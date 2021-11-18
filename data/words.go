@@ -1,7 +1,8 @@
 package data
 
 type Words struct {
-	Words map[string]*Word
+	Words          map[string]*Word
+	TotalWordCount int
 }
 
 func NewWords() *Words {
@@ -17,6 +18,7 @@ func (words *Words) MergeWords(toMerge map[string]*Word) *Words {
 		} else {
 			words.Words[key] = value
 		}
+		words.TotalWordCount += value.Occurrences
 	}
 	return words
 }

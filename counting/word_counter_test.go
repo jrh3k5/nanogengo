@@ -15,6 +15,8 @@ func TestCounting(t *testing.T) {
 	words, err := wordCounter.CountWords()
 	assert.NilError(t, err, "Error occurred while counting words")
 
+	assert.Equal(t, words.TotalWordCount, 8)
+
 	assert.Assert(t, is.Contains(words.Words, "fish"))
 	fishWord := words.Words["fish"]
 	assert.Equal(t, fishWord.Occurrences, 4)
@@ -43,6 +45,8 @@ func TestCountsStripPunctuation(t *testing.T) {
 	wordCounter := LinesProviderWordCounter{LinesProvider: linesProvider}
 	words, err := wordCounter.CountWords()
 	assert.NilError(t, err, "Error occurred while counting words")
+
+	assert.Equal(t, words.TotalWordCount, 4)
 
 	assert.Assert(t, is.Contains(words.Words, "fox"))
 	foxWord := words.Words["fox"]
