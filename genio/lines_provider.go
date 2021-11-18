@@ -2,7 +2,6 @@ package genio
 
 import (
 	"bufio"
-	"container/list"
 	"io"
 	"io/ioutil"
 	"os"
@@ -14,7 +13,7 @@ type LinesProvider interface {
 	// ProvideLines provides the lines to be used for NaNoGenGo
 	// Returns a list of the strings
 	// If there is an error, a nil list address and the error object is returned
-	ProvideLines() (list.List, error)
+	ProvideLines() ([]string, error)
 }
 
 // DirectoryLinesProvider provides lines from a given directory location
@@ -27,14 +26,18 @@ type ReaderLinesProvider struct {
 	Reader io.Reader
 }
 
-func (directory DirectoryLinesProvider) ProvideLines() (list.List, error) {
+type ArrayLinesProvider struct {
+	Lines []string
+}
+
+func (directory DirectoryLinesProvider) ProvideLines() ([]string, error) {
 	files, err := ioutil.ReadDir(directory.DirLocation)
 
 	if err != nil {
-		return *new(list.List), err
+		return *new([]string), err
 	}
 
-	lines := list.New()
+	lines := make([]string, 0)
 	for _, file := range files {
 		if file.IsDir() || !strings.HasSuffix(strings.ToLower(file.Name()), ".txt") {
 			continue
@@ -43,32 +46,36 @@ func (directory DirectoryLinesProvider) ProvideLines() (list.List, error) {
 		fullFileName := filepath.Join(directory.DirLocation, file.Name())
 		fileRef, err := os.Open(fullFileName)
 		if err != nil {
-			return *new(list.List), err
+			return *new([]string), err
 		}
 		defer fileRef.Close()
 
 		readerContainer := ReaderLinesProvider{Reader: fileRef}
 		fileLines, err := readerContainer.ProvideLines()
 		if err != nil {
-			return *new(list.List), err
+			return *new([]string), err
 		}
-		lines.PushBackList(&fileLines)
+		lines = append(lines, fileLines...)
 	}
 
-	return *lines, nil
+	return lines, nil
 }
 
-func (reader ReaderLinesProvider) ProvideLines() (list.List, error) {
-	lines := list.New()
+func (reader ReaderLinesProvider) ProvideLines() ([]string, error) {
+	lines := make([]string, 0)
 
 	scanner := bufio.NewScanner(reader.Reader)
 	for scanner.Scan() {
-		lines.PushBack(scanner.Text())
+		lines = append(lines, scanner.Text())
 	}
 
 	if err := scanner.Err(); err != nil {
-		return *new(list.List), err
+		return *new([]string), err
 	}
 
-	return *lines, nil
+	return lines, nil
+}
+
+func (arrayProvider ArrayLinesProvider) ProvideLines() ([]string, error) {
+	return arrayProvider.Lines, nil
 }

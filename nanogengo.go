@@ -16,5 +16,5 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to read files: ", err)
 	}
-	fmt.Printf("Read in %v lines", lines.Len())
+	fmt.Printf("Read in %v lines", len(lines))
 }
