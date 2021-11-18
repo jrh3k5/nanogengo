@@ -1,6 +1,9 @@
 package data
 
-import "strings"
+import (
+	"math/rand"
+	"strings"
+)
 
 type Words struct {
 	Words          map[string]*Word
@@ -26,4 +29,19 @@ func (words *Words) AddWordOccurrence(occurrence string) *Word {
 		words.TotalWordCount++
 		return newWord
 	}
+}
+
+func (words *Words) FindStartingWord(sentenceStartProbability float64) (*Word, error) {
+	startableWords := make([]*Word, 10, words.TotalWordCount)
+	for _, word := range words.Words {
+		if word.HasStartProbability(sentenceStartProbability) {
+			startableWords = append(startableWords, word)
+		}
+	}
+
+	if len(startableWords) == 0 {
+		return nil, nil
+	}
+
+	return startableWords[rand.Intn(len(startableWords))], nil
 }

@@ -72,3 +72,10 @@ func (word *Word) AddPunctuation(punctuation string) {
 func (word *Word) GetKey() string {
 	return strings.ToLower(word.Word)
 }
+
+// HasStartProbability measures whether or not the probability of this word
+// is as equal or more likely to occur than the given probability
+func (word *Word) HasStartProbability(probability float64) bool {
+	startProbability := float64(word.SentenceStartCount) / float64(word.Occurrences)
+	return startProbability-probability >= 0
+}
