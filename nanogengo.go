@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"nanogengo/counting"
 	"nanogengo/genio"
 	"os"
 )
@@ -12,9 +13,10 @@ func main() {
 	fmt.Printf("Read files from: %v\n", textFilesDir)
 
 	linesProvider := genio.DirectoryLinesProvider{DirLocation: textFilesDir}
-	lines, err := linesProvider.ProvideLines()
+	wordCounter := counting.LinesProviderWordCounter{LinesProvider: linesProvider}
+	words, err := wordCounter.CountWords()
 	if err != nil {
-		log.Fatal("Failed to read files: ", err)
+		log.Fatalf("Unexpected error counting words: ", err)
 	}
-	fmt.Printf("Read in %v lines", len(lines))
+	fmt.Printf("Counted %v words", len(words.Words))
 }
