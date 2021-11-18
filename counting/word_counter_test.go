@@ -78,6 +78,13 @@ func TestCountsStripPunctuation(t *testing.T) {
 	assert.Equal(t, foxWord.Successors["hen"].Occurrences, 1)
 	assert.Equal(t, len(foxWord.Successors), 1, "The punctuation should mean only 'Hen' follows fox, and it's once")
 
+	assert.Assert(t, is.Contains(foxWord.Punctuations, "."))
+	assert.Equal(t, foxWord.Punctuations["."].Occurrences, 1)
+	assert.Assert(t, is.Contains(foxWord.Punctuations, "?"))
+	assert.Equal(t, foxWord.Punctuations["?"].Occurrences, 1)
+	assert.Equal(t, len(foxWord.Punctuations), 2)
+	assert.Equal(t, foxWord.TotalPunctuationCount, 2)
+
 	assert.Assert(t, is.Contains(words.Words, "hen"))
 	henWord := words.Words["hen"]
 	assert.Equal(t, henWord.Occurrences, 1)
