@@ -16,7 +16,7 @@ func main() {
 	wordCounter := counting.LinesProviderWordCounter{LinesProvider: linesProvider}
 	words, err := wordCounter.CountWords()
 	if err != nil {
-		log.Fatalf("Unexpected error counting words: ", err)
+		log.Fatalf("Unexpected error counting words: %v", err)
 	}
 	fmt.Printf("Counted %v words", len(words.Words))
 }
