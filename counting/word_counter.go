@@ -33,12 +33,7 @@ func (wordCounter LinesProviderWordCounter) CountWords() (data.Words, error) {
 }
 
 func CountWords(line string, words *data.Words) error {
-	nonAlphaRegex, err := regexp.Compile("[^a-zA-Z0-9]+")
-	if err != nil {
-		return err
-	}
-
-	alphaOnlyRegex, err := regexp.Compile("[a-zA-Z0-9]+$")
+	punctuationRegex, err := regexp.Compile("[^a-zA-Z0-9]+$")
 	if err != nil {
 		return err
 	}
@@ -51,17 +46,19 @@ func CountWords(line string, words *data.Words) error {
 			continue
 		}
 
-		effectiveToken := nonAlphaRegex.ReplaceAllString(trimmedToken, "")
+		effectiveToken := punctuationRegex.ReplaceAllString(trimmedToken, "")
 		currentWord := words.AddWordOccurrence(effectiveToken)
 		// If there's any non-alphanumeric characters at the end, then consider this the end of the
 		// sentence, so 'reset' the tracking so that the end of this sentence isn't mistakenly
 		// tracked as preceding the beginning of the next sentence
-		if alphaOnlyRegex.MatchString(trimmedToken) {
+		if !punctuationRegex.MatchString(trimmedToken) {
 			if previousWord != nil {
 				previousWord.AddSuccessor(currentWord)
 			}
 			previousWord = currentWord
 		} else {
+			punctuation := punctuationRegex.FindStringSubmatch(trimmedToken)[0]
+			currentWord.AddPunctuation(punctuation)
 			previousWord = nil
 		}
 	}
