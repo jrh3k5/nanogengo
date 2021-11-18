@@ -38,6 +38,7 @@ func (word *Word) AddSuccessor(successor *Word) {
 		newSuccessor.Occurrences = 1
 		word.Successors[successor.GetKey()] = newSuccessor
 	}
+	word.TotalSuccessorCount++
 }
 
 func (word *Word) GetKey() string {
