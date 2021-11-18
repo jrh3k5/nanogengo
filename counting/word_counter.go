@@ -23,23 +23,22 @@ func (wordCounter LinesProviderWordCounter) CountWords() (data.Words, error) {
 	}
 
 	for _, line := range lines {
-		wordCounts, err := CountWords(line)
+		err := CountWords(line, words)
 		if err != nil {
 			return *new(data.Words), err
 		}
-		words.MergeWords(wordCounts)
 	}
 
 	return *words, nil
 }
 
-func CountWords(line string) (map[string]*data.Word, error) {
+func CountWords(line string, words *data.Words) error {
 	alphaOnlyRegex, err := regexp.Compile("[^a-zA-Z0-9]+")
 	if err != nil {
-		return *new(map[string]*data.Word), err
+		return err
 	}
 
-	wordMap := make(map[string]*data.Word)
+	var previousWord *data.Word
 	tokens := strings.Split(line, " ")
 	for _, token := range tokens {
 		trimmedToken := strings.TrimSpace(token)
@@ -48,14 +47,11 @@ func CountWords(line string) (map[string]*data.Word, error) {
 		}
 
 		effectiveToken := alphaOnlyRegex.ReplaceAllString(trimmedToken, "")
-		tokenKey := strings.ToLower(effectiveToken)
-		if existingWord, doesContain := wordMap[tokenKey]; doesContain {
-			existingWord.Increment(1)
-		} else {
-			newWord := data.NewWord(effectiveToken)
-			newWord.Occurrences = 1
-			wordMap[tokenKey] = newWord
+		currentWord := words.AddWordOccurrence(effectiveToken)
+		if previousWord != nil {
+			previousWord.AddSuccessor(currentWord)
 		}
+		previousWord = currentWord
 	}
-	return wordMap, nil
+	return nil
 }
