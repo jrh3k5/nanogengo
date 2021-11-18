@@ -16,7 +16,7 @@ func NewWords() *Words {
 func (words *Words) AddWordOccurrence(occurrence string) *Word {
 	key := strings.ToLower(occurrence)
 	if existingWord, doesContain := words.Words[key]; doesContain {
-		existingWord.Increment(1)
+		existingWord.IncrementOccurences(1)
 		words.TotalWordCount++
 		return existingWord
 	} else {

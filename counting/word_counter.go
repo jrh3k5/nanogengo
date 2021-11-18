@@ -48,6 +48,11 @@ func CountWords(line string, words *data.Words) error {
 
 		effectiveToken := punctuationRegex.ReplaceAllString(trimmedToken, "")
 		currentWord := words.AddWordOccurrence(effectiveToken)
+
+		if previousWord == nil {
+			currentWord.IncrementSentenceStart(1)
+		}
+
 		// If there's any non-alphanumeric characters at the end, then consider this the end of the
 		// sentence, so 'reset' the tracking so that the end of this sentence isn't mistakenly
 		// tracked as preceding the beginning of the next sentence

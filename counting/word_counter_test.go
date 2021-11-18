@@ -21,6 +21,7 @@ func TestCounting(t *testing.T) {
 	fishWord := words.Words["fish"]
 	assert.Equal(t, fishWord.Occurrences, 4)
 	assert.Equal(t, fishWord.TotalSuccessorCount, 2)
+	assert.Equal(t, fishWord.SentenceStartCount, 0)
 	// Verify fish successors
 	assert.Assert(t, is.Contains(fishWord.Successors, "two"))
 	assert.Equal(t, fishWord.Successors["two"].Occurrences, 1)
@@ -32,6 +33,7 @@ func TestCounting(t *testing.T) {
 	oneWord := words.Words["one"]
 	assert.Equal(t, oneWord.Occurrences, 1)
 	assert.Equal(t, oneWord.TotalSuccessorCount, 1)
+	assert.Equal(t, oneWord.SentenceStartCount, 1)
 	assert.Assert(t, is.Contains(oneWord.Successors, "fish"))
 	assert.Equal(t, oneWord.Successors["fish"].Occurrences, 1)
 	assert.Equal(t, len(oneWord.Successors), 1)
@@ -40,6 +42,7 @@ func TestCounting(t *testing.T) {
 	twoWord := words.Words["two"]
 	assert.Equal(t, twoWord.Occurrences, 1)
 	assert.Equal(t, twoWord.TotalSuccessorCount, 1)
+	assert.Equal(t, twoWord.SentenceStartCount, 0)
 	assert.Assert(t, is.Contains(twoWord.Successors, "fish"))
 	assert.Equal(t, twoWord.Successors["fish"].Occurrences, 1)
 	assert.Equal(t, len(twoWord.Successors), 1)
@@ -48,6 +51,7 @@ func TestCounting(t *testing.T) {
 	redWord := words.Words["red"]
 	assert.Equal(t, redWord.Occurrences, 1)
 	assert.Equal(t, redWord.TotalSuccessorCount, 1)
+	assert.Equal(t, redWord.SentenceStartCount, 1)
 	assert.Assert(t, is.Contains(redWord.Successors, "fish"))
 	assert.Equal(t, redWord.Successors["fish"].Occurrences, 1)
 	assert.Equal(t, len(redWord.Successors), 1)
@@ -56,6 +60,7 @@ func TestCounting(t *testing.T) {
 	blueWord := words.Words["blue"]
 	assert.Equal(t, blueWord.Occurrences, 1)
 	assert.Equal(t, blueWord.TotalSuccessorCount, 1)
+	assert.Equal(t, blueWord.SentenceStartCount, 0)
 	assert.Assert(t, is.Contains(blueWord.Successors, "fish"))
 	assert.Equal(t, blueWord.Successors["fish"].Occurrences, 1)
 	assert.Equal(t, len(blueWord.Successors), 1)
@@ -74,6 +79,7 @@ func TestCountsStripPunctuation(t *testing.T) {
 	assert.Assert(t, is.Contains(words.Words, "fox"))
 	foxWord := words.Words["fox"]
 	assert.Equal(t, foxWord.Occurrences, 3)
+	assert.Equal(t, foxWord.SentenceStartCount, 3)
 	assert.Assert(t, is.Contains(foxWord.Successors, "hen"))
 	assert.Equal(t, foxWord.Successors["hen"].Occurrences, 1)
 	assert.Equal(t, len(foxWord.Successors), 1, "The punctuation should mean only 'Hen' follows fox, and it's once")
@@ -89,5 +95,6 @@ func TestCountsStripPunctuation(t *testing.T) {
 	henWord := words.Words["hen"]
 	assert.Equal(t, henWord.Occurrences, 1)
 	assert.Equal(t, henWord.TotalSuccessorCount, 0)
+	assert.Equal(t, henWord.SentenceStartCount, 0)
 	assert.Equal(t, len(henWord.Successors), 0)
 }

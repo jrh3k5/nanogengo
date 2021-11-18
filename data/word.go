@@ -9,6 +9,7 @@ type Word struct {
 	TotalSuccessorCount   int
 	Punctuations          map[string]*Punctuation
 	TotalPunctuationCount int
+	SentenceStartCount    int
 }
 
 type WordSuccessor struct {
@@ -29,21 +30,25 @@ func NewWord(word string) *Word {
 	return newWord
 }
 
-func (word *Word) Increment(delta int) {
+func (word *Word) IncrementOccurences(delta int) {
 	word.Occurrences = word.Occurrences + delta
 }
 
-func (wordSuccessor *WordSuccessor) Increment(delta int) {
+func (word *Word) IncrementSentenceStart(delta int) {
+	word.SentenceStartCount = word.SentenceStartCount + delta
+}
+
+func (wordSuccessor *WordSuccessor) IncrementOccurrences(delta int) {
 	wordSuccessor.Occurrences = wordSuccessor.Occurrences + delta
 }
 
-func (punctuation *Punctuation) Increment(delta int) {
+func (punctuation *Punctuation) IncrementOccurrences(delta int) {
 	punctuation.Occurrences = punctuation.Occurrences + delta
 }
 
 func (word *Word) AddSuccessor(successor *Word) {
 	if existingSuccessor, doesContain := word.Successors[successor.GetKey()]; doesContain {
-		existingSuccessor.Increment(1)
+		existingSuccessor.IncrementOccurrences(1)
 	} else {
 		newSuccessor := new(WordSuccessor)
 		newSuccessor.Word = successor
@@ -55,7 +60,7 @@ func (word *Word) AddSuccessor(successor *Word) {
 
 func (word *Word) AddPunctuation(punctuation string) {
 	if existingPunctuation, doesContain := word.Punctuations[punctuation]; doesContain {
-		existingPunctuation.Increment(1)
+		existingPunctuation.IncrementOccurrences(1)
 	} else {
 		newPunctuation := new(Punctuation)
 		newPunctuation.Occurrences = 1
