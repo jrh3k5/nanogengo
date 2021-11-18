@@ -35,3 +35,20 @@ func TestCounting(t *testing.T) {
 	blueWord := words.Words["blue"]
 	assert.Equal(t, blueWord.Occurrences, 1)
 }
+
+// TestCountsStripPunctuation verifies that punctuation is not counted when counting words
+func TestCountsStripPunctuation(t *testing.T) {
+	lines := []string{"Fox. Fox? Fox  Hen"}
+	linesProvider := genio.ArrayLinesProvider{Lines: lines}
+	wordCounter := LinesProviderWordCounter{LinesProvider: linesProvider}
+	words, err := wordCounter.CountWords()
+	assert.NilError(t, err, "Error occurred while counting words")
+
+	assert.Assert(t, is.Contains(words.Words, "fox"))
+	foxWord := words.Words["fox"]
+	assert.Equal(t, foxWord.Occurrences, 3)
+
+	assert.Assert(t, is.Contains(words.Words, "hen"))
+	henWord := words.Words["hen"]
+	assert.Equal(t, henWord.Occurrences, 1)
+}
