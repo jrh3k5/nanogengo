@@ -23,23 +23,27 @@ func (wordCounter LinesProviderWordCounter) CountWords() (data.Words, error) {
 	}
 
 	for _, line := range lines {
-		wordCounts, err := CountWords(line)
+		err := CountWords(line, words)
 		if err != nil {
 			return *new(data.Words), err
 		}
-		words.MergeWords(wordCounts)
 	}
 
 	return *words, nil
 }
 
-func CountWords(line string) (map[string]*data.Word, error) {
-	alphaOnlyRegex, err := regexp.Compile("[^a-zA-Z0-9]+")
+func CountWords(line string, words *data.Words) error {
+	nonAlphaRegex, err := regexp.Compile("[^a-zA-Z0-9]+")
 	if err != nil {
-		return *new(map[string]*data.Word), err
+		return err
 	}
 
-	wordMap := make(map[string]*data.Word)
+	alphaOnlyRegex, err := regexp.Compile("[a-zA-Z0-9]+$")
+	if err != nil {
+		return err
+	}
+
+	var previousWord *data.Word
 	tokens := strings.Split(line, " ")
 	for _, token := range tokens {
 		trimmedToken := strings.TrimSpace(token)
@@ -47,15 +51,19 @@ func CountWords(line string) (map[string]*data.Word, error) {
 			continue
 		}
 
-		effectiveToken := alphaOnlyRegex.ReplaceAllString(trimmedToken, "")
-		tokenKey := strings.ToLower(effectiveToken)
-		if existingWord, doesContain := wordMap[tokenKey]; doesContain {
-			existingWord.Increment(1)
+		effectiveToken := nonAlphaRegex.ReplaceAllString(trimmedToken, "")
+		currentWord := words.AddWordOccurrence(effectiveToken)
+		// If there's any non-alphanumeric characters at the end, then consider this the end of the
+		// sentence, so 'reset' the tracking so that the end of this sentence isn't mistakenly
+		// tracked as preceding the beginning of the next sentence
+		if alphaOnlyRegex.MatchString(trimmedToken) {
+			if previousWord != nil {
+				previousWord.AddSuccessor(currentWord)
+			}
+			previousWord = currentWord
 		} else {
-			newWord := data.NewWord(effectiveToken)
-			newWord.Occurrences = 1
-			wordMap[tokenKey] = newWord
+			previousWord = nil
 		}
 	}
-	return wordMap, nil
+	return nil
 }

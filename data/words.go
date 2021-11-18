@@ -1,7 +1,10 @@
 package data
 
+import "strings"
+
 type Words struct {
-	Words map[string]*Word
+	Words          map[string]*Word
+	TotalWordCount int
 }
 
 func NewWords() *Words {
@@ -10,13 +13,17 @@ func NewWords() *Words {
 	return words
 }
 
-func (words *Words) MergeWords(toMerge map[string]*Word) *Words {
-	for key, value := range toMerge {
-		if existingWord, doesContain := words.Words[key]; doesContain {
-			existingWord.Increment(value.Occurrences)
-		} else {
-			words.Words[key] = value
-		}
+func (words *Words) AddWordOccurrence(occurrence string) *Word {
+	key := strings.ToLower(occurrence)
+	if existingWord, doesContain := words.Words[key]; doesContain {
+		existingWord.Increment(1)
+		words.TotalWordCount++
+		return existingWord
+	} else {
+		newWord := NewWord(occurrence)
+		newWord.Occurrences = 1
+		words.Words[key] = newWord
+		words.TotalWordCount++
+		return newWord
 	}
-	return words
 }
