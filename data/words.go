@@ -31,17 +31,27 @@ func (words *Words) AddWordOccurrence(occurrence string) *Word {
 	}
 }
 
-func (words *Words) FindStartingWord(sentenceStartProbability float64) (*Word, error) {
-	startableWords := make([]*Word, 10, words.TotalWordCount)
-	for _, word := range words.Words {
-		if word.HasStartProbability(sentenceStartProbability) {
-			startableWords = append(startableWords, word)
-		}
-	}
-
-	if len(startableWords) == 0 {
+func (words *Words) GetSentenceStart() (*Word, error) {
+	if words.TotalWordCount == 0 {
 		return nil, nil
 	}
 
-	return startableWords[rand.Intn(len(startableWords))], nil
+	probability := rand.Float64()
+	var word *Word
+	for word == nil {
+		startableWords := make([]*Word, 10, words.TotalWordCount)
+		for _, candidateWord := range words.Words {
+			if candidateWord.HasStartProbability(probability) {
+				startableWords = append(startableWords, candidateWord)
+			}
+		}
+
+		if len(startableWords) == 0 {
+			return nil, nil
+		}
+
+		word = startableWords[rand.Intn(len(startableWords))]
+	}
+
+	return word, nil
 }
