@@ -79,3 +79,16 @@ func (word *Word) HasStartProbability(probability float64) bool {
 	startProbability := float64(word.SentenceStartCount) / float64(word.Occurrences)
 	return startProbability-probability >= 0
 }
+
+// // Gets, if probability indicates, puncutation to follow this word. Returns a nil pointer if there is no applicable punctuation at this time
+// func (word *Word) GetPunctuation() (Punctuation, error) {
+// 	if word.TotalPunctuationCount == 0 {
+// 		return *new(Punctuation), nil
+// 	}
+
+// }
+
+// // Gets the next word for the given word. Returns nil if there is no word to follow.
+// func (word *Word) GetNextWord() (Word, error) {
+
+// }

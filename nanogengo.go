@@ -3,10 +3,11 @@ package main
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"nanogengo/counting"
 	"nanogengo/genio"
-	"nanogengo/probability"
 	"os"
+	"time"
 )
 
 func main() {
@@ -21,8 +22,7 @@ func main() {
 	}
 	fmt.Printf("Counted %v words\n", len(words.Words))
 
-	wordsProbability := probability.WordsBackedWordsProbability{Words: words}
-	firstWord, err := wordsProbability.GetSentenceStart()
+	firstWord, err := words.GetSentenceStart()
 	if err != nil {
 		log.Fatalf("Failed to get the first word: %v\n", err)
 	}
@@ -30,4 +30,9 @@ func main() {
 		log.Fatal("Unable to select a matching starting first word\n")
 	}
 	fmt.Printf("First word is: %v", firstWord.Word)
+}
+
+// init sets initial values for variables used in the function.
+func init() {
+	rand.Seed(time.Now().UnixNano())
 }
