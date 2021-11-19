@@ -38,7 +38,9 @@ func main() {
 		currentSentenceLength++
 		toPrint := strings.ToLower(currentWord.Word)
 		// Only capitalize if this is the very first word, or if this is following punctuation and the previous punctuation was a terminator
-		if currentSentenceLength == 1 && previousPunctuation == nil || (previousPunctuation != nil && previousPunctuation.Terminator) {
+		if (currentSentenceLength == 1 &&
+			(previousPunctuation == nil || (previousPunctuation != nil && previousPunctuation.Terminator))) ||
+			len(currentWord.Word) == 1 {
 			toPrint = strings.Title(toPrint)
 		}
 		fmt.Print(toPrint)
