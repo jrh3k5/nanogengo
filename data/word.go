@@ -1,15 +1,21 @@
 package data
 
-import "strings"
+import (
+	"errors"
+	"math/rand"
+	"strings"
+)
 
 type Word struct {
-	Word                  string
-	Occurrences           int
-	Successors            map[string]*WordSuccessor
-	TotalSuccessorCount   int
-	Punctuations          map[string]*Punctuation
-	TotalPunctuationCount int
-	SentenceStartCount    int
+	Word                        string
+	Occurrences                 int
+	Successors                  map[string]*WordSuccessor
+	TotalSuccessorCount         int
+	TotalSuccessorOccurrences   int
+	Punctuations                map[string]*Punctuation
+	TotalPunctuationCount       int
+	TotalPunctuationOccurrences int
+	SentenceStartCount          int
 }
 
 type WordSuccessor struct {
@@ -54,19 +60,27 @@ func (word *Word) AddSuccessor(successor *Word) {
 		newSuccessor.Word = successor
 		newSuccessor.Occurrences = 1
 		word.Successors[successor.GetKey()] = newSuccessor
+		word.TotalSuccessorCount++
 	}
-	word.TotalSuccessorCount++
+	word.TotalSuccessorOccurrences++
 }
 
-func (word *Word) AddPunctuation(punctuation string) {
+func (word *Word) AddPunctuation(punctuation string) error {
+	if len(strings.TrimSpace(punctuation)) == 0 {
+		return errors.New("invalid punctuation: " + punctuation)
+	}
+
 	if existingPunctuation, doesContain := word.Punctuations[punctuation]; doesContain {
 		existingPunctuation.IncrementOccurrences(1)
 	} else {
 		newPunctuation := new(Punctuation)
+		newPunctuation.Punctuation = punctuation
 		newPunctuation.Occurrences = 1
 		word.Punctuations[punctuation] = newPunctuation
+		word.TotalPunctuationCount++
 	}
-	word.TotalPunctuationCount++
+	word.TotalPunctuationOccurrences++
+	return nil
 }
 
 func (word *Word) GetKey() string {
@@ -80,15 +94,52 @@ func (word *Word) HasStartProbability(probability float64) bool {
 	return startProbability-probability >= 0
 }
 
-// // Gets, if probability indicates, puncutation to follow this word. Returns a nil pointer if there is no applicable punctuation at this time
-// func (word *Word) GetPunctuation() (Punctuation, error) {
-// 	if word.TotalPunctuationCount == 0 {
-// 		return *new(Punctuation), nil
-// 	}
+// Gets, if probability indicates, puncutation to follow this word. Returns a nil pointer if there is no applicable punctuation at this time
+func (word *Word) GetPunctuation() (*Punctuation, error) {
+	if word.TotalPunctuationCount == 0 {
+		return nil, nil
+	}
 
-// }
+	// Find the closest punctuation that does not fall below the probability
+	var matchingPunctuation *Punctuation
+	// Sometimes, the probability calculated can be too low, so keep looping until a punctuation is selected
+	for matchingPunctuation == nil {
+		puncProbability := rand.Float64()
+		var matchingPunctuationProbability float64
+		for _, candidate := range word.Punctuations {
+			candidateProbability := float64(candidate.Occurrences) / float64(word.TotalPunctuationOccurrences)
+			// If the current candidate is within the range of probability and is *more probable* than what was previously selected,
+			// use that punctuation
+			if candidateProbability >= puncProbability && candidateProbability >= matchingPunctuationProbability {
+				matchingPunctuation = candidate
+				matchingPunctuationProbability = candidateProbability
+			}
+		}
+	}
 
-// // Gets the next word for the given word. Returns nil if there is no word to follow.
-// func (word *Word) GetNextWord() (Word, error) {
+	return matchingPunctuation, nil
+}
 
-// }
+// Gets the next word for the given word. Returns nil if there is no word to follow.
+func (word *Word) GetNextWord() (*Word, error) {
+	if word.TotalSuccessorCount == 0 {
+		return nil, nil
+	}
+
+	var matchingWord *WordSuccessor
+	for matchingWord == nil {
+		wordProbability := rand.Float64()
+		var matchingWordProbability float64
+		for _, candidate := range word.Successors {
+			candidateProbability := float64(candidate.Occurrences) / float64(word.TotalPunctuationOccurrences)
+			// If the current candidate is within the range of probability and is *more probable* than what was previously selected,
+			// use that word
+			if candidateProbability >= wordProbability && candidateProbability >= matchingWordProbability {
+				matchingWord = candidate
+				matchingWordProbability = candidateProbability
+			}
+		}
+	}
+
+	return matchingWord.Word, nil
+}

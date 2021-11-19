@@ -1,6 +1,7 @@
 package counting
 
 import (
+	"fmt"
 	"nanogengo/data"
 	"nanogengo/genio"
 	"regexp"
@@ -63,7 +64,10 @@ func CountWords(line string, words *data.Words) error {
 			previousWord = currentWord
 		} else {
 			punctuation := punctuationRegex.FindStringSubmatch(trimmedToken)[0]
-			currentWord.AddPunctuation(punctuation)
+			err = currentWord.AddPunctuation(punctuation)
+			if err != nil {
+				return fmt.Errorf("unable to add punctuation '%v' for word '%v': %v", punctuation, trimmedToken, err)
+			}
 			previousWord = nil
 		}
 	}
