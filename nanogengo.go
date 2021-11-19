@@ -47,12 +47,31 @@ func main() {
 		previousPunctuation = nil
 
 		var punctuation *data.Punctuation
+		var nextWord *data.Word
 		// Avoid awkwardness of too-short sentences by only getting a punctuation if there's enough
 		// sentence to punctuate
 		if currentSentenceLength > 2 {
 			punctuation, err = currentWord.GetPunctuation()
 			if err != nil {
 				log.Fatalf("Unable to get punctuation for word '%v': %v", currentWord.Word, err)
+			}
+		}
+
+		if punctuation == nil {
+			nextWord, err = data.GetNextWord(currentWord)
+			if err != nil {
+				log.Fatalf("Unable to get next word after punctuation '%v': %v", currentWord.Word, err)
+			}
+			if nextWord == nil {
+				// If there's no next word, force a usage of punctuation - and if that's not available, bomb out
+				punctuation, err = currentWord.GetPunctuation()
+				if err != nil {
+					log.Fatalf("Unable to get punctuation after lack of next word for word '%v': %v", currentWord.Word, err)
+				}
+
+				if punctuation == nil {
+					log.Fatalf("Unexpected termination of no word and no punctuation available after word '%v'", currentWord.Word)
+				}
 			}
 		}
 
@@ -77,15 +96,9 @@ func main() {
 
 			currentSentenceLength = 0
 		} else {
-			nextWord, err := data.GetNextWord(currentWord)
-			if err != nil {
-				log.Fatalf("Unable to get next word after punctuation '%v': %v", currentWord.Word, err)
-			}
-			if nextWord == nil {
-				log.Fatalf("Unexpected termination of no word and no punctuation available after word '%v'", currentWord.Word)
-			}
 			currentWord = nextWord
 		}
+
 		fmt.Print(" ")
 	}
 
