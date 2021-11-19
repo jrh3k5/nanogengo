@@ -6,6 +6,12 @@ import (
 	"strings"
 )
 
+type Successable interface {
+	Successors() map[string]*WordSuccessor
+	TotalSuccessorCount() int
+	TotalSuccessorOccurrences() int
+}
+
 type Word struct {
 	Word                        string
 	Occurrences                 int
@@ -24,8 +30,11 @@ type WordSuccessor struct {
 }
 
 type Punctuation struct {
-	Punctuation string
-	Occurrences int
+	Punctuation               string
+	Occurrences               int
+	Successors                map[string]*WordSuccessor
+	TotalSuccessorCount       int
+	TotalSuccessorOccurrences int
 }
 
 func NewWord(word string) *Word {
@@ -63,6 +72,19 @@ func (word *Word) AddSuccessor(successor *Word) {
 		word.TotalSuccessorCount++
 	}
 	word.TotalSuccessorOccurrences++
+}
+
+func (punctuation *Punctuation) AddSuccessor(successor *Word) {
+	if existingSuccessor, doesContain := punctuation.Successors[successor.GetKey()]; doesContain {
+		existingSuccessor.IncrementOccurrences(1)
+	} else {
+		newSuccessor := new(WordSuccessor)
+		newSuccessor.Word = successor
+		newSuccessor.Occurrences = 1
+		punctuation.Successors[successor.GetKey()] = newSuccessor
+		punctuation.TotalSuccessorCount++
+	}
+	punctuation.TotalSuccessorOccurrences++
 }
 
 func (word *Word) AddPunctuation(punctuation string) error {
