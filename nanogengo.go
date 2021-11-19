@@ -8,6 +8,7 @@ import (
 	"nanogengo/data"
 	"nanogengo/genio"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -32,9 +33,19 @@ func main() {
 	}
 
 	currentSentenceLength := 0
-	for wordCount := 0; wordCount < 500 && currentWord != nil; wordCount++ {
+	var previousPunctuation *data.Punctuation
+	for wordCount := 0; wordCount < 500; wordCount++ {
 		currentSentenceLength++
-		fmt.Print(currentWord.Word)
+		toPrint := strings.ToLower(currentWord.Word)
+		// Only capitalize if this is the very first word, or if this is following punctuation and the previous punctuation was a terminator
+		if currentSentenceLength == 1 && previousPunctuation == nil || (previousPunctuation != nil && previousPunctuation.Terminator) {
+			toPrint = strings.Title(toPrint)
+		}
+		fmt.Print(toPrint)
+
+		// Prevent the next token from accidentally thinking it follows punctuation
+		previousPunctuation = nil
+
 		var punctuation *data.Punctuation
 		// Avoid awkwardness of too-short sentences by only getting a punctuation if there's enough
 		// sentence to punctuate
@@ -47,10 +58,23 @@ func main() {
 
 		if punctuation != nil {
 			fmt.Print(punctuation.Punctuation)
+			previousPunctuation = punctuation
 			currentWord, err = data.GetNextWord(punctuation)
 			if err != nil {
 				log.Fatalf("Unable to get next word after punctuation '%v': %v", punctuation.Punctuation, err)
 			}
+
+			// If there is no word found to follow the punctuation, then select a new first word
+			if currentWord == nil {
+				currentWord, err = words.GetSentenceStart()
+				if err != nil {
+					log.Fatalf("Failed to get a first word after punctuation '%v' yielded no successor: %v\n", punctuation.Punctuation, err)
+				}
+				if currentWord == nil {
+					log.Fatalf("Unable to select a matching starting first word after punctuation '%v' yielded no successor\n", punctuation.Punctuation)
+				}
+			}
+
 			currentSentenceLength = 0
 		} else {
 			nextWord, err := data.GetNextWord(currentWord)
