@@ -68,7 +68,7 @@ func TestCounting(t *testing.T) {
 
 // TestCountsStripPunctuation verifies that punctuation is not counted when counting words
 func TestCountsStripPunctuation(t *testing.T) {
-	lines := []string{"Fox. Fox? Fox  Hen"}
+	lines := []string{"Fox. Fox? Fox  Hen!"}
 	linesProvider := genio.ArrayLinesProvider{Lines: lines}
 	wordCounter := LinesProviderWordCounter{LinesProvider: linesProvider}
 	words, err := wordCounter.CountWords()
@@ -86,8 +86,10 @@ func TestCountsStripPunctuation(t *testing.T) {
 
 	assert.Assert(t, is.Contains(foxWord.Punctuations, "."))
 	assert.Equal(t, foxWord.Punctuations["."].Occurrences, 1)
+	assert.Assert(t, is.Contains(foxWord.Punctuations["."].Successors, "fox"))
 	assert.Assert(t, is.Contains(foxWord.Punctuations, "?"))
 	assert.Equal(t, foxWord.Punctuations["?"].Occurrences, 1)
+	assert.Assert(t, is.Contains(foxWord.Punctuations["?"].Successors, "fox"))
 	assert.Equal(t, len(foxWord.Punctuations), 2)
 	assert.Equal(t, foxWord.TotalPunctuationCount, 2)
 
@@ -97,4 +99,6 @@ func TestCountsStripPunctuation(t *testing.T) {
 	assert.Equal(t, henWord.TotalSuccessorCount, 0)
 	assert.Equal(t, henWord.SentenceStartCount, 0)
 	assert.Equal(t, len(henWord.Successors), 0)
+	assert.Assert(t, is.Contains(henWord.Punctuations, "!"))
+	assert.Equal(t, henWord.Punctuations["!"].TotalSuccessorCount, 0)
 }

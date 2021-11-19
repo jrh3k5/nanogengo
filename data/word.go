@@ -57,6 +57,7 @@ type Punctuation struct {
 	Successors                map[string]*WordSuccessor
 	TotalSuccessorCount       int
 	TotalSuccessorOccurrences int
+	Terminator                bool
 }
 
 func (punctuation *Punctuation) GetSuccessors() map[string]*WordSuccessor {
@@ -116,22 +117,26 @@ func AddSuccessor(successable Successable, successor *Word) {
 	successable.IncrementSuccessorOccurrences(1)
 }
 
-func (word *Word) AddPunctuation(punctuation string) error {
+func (word *Word) AddPunctuation(punctuation string) (*Punctuation, error) {
 	if len(strings.TrimSpace(punctuation)) == 0 {
-		return errors.New("invalid punctuation: " + punctuation)
+		return nil, errors.New("invalid punctuation: " + punctuation)
 	}
 
 	if existingPunctuation, doesContain := word.Punctuations[punctuation]; doesContain {
 		existingPunctuation.IncrementOccurrences(1)
+		word.TotalPunctuationOccurrences++
+		return existingPunctuation, nil
 	} else {
 		newPunctuation := new(Punctuation)
 		newPunctuation.Punctuation = punctuation
 		newPunctuation.Occurrences = 1
+		newPunctuation.Terminator = punctuation == "?" || punctuation == "!" || punctuation == "."
+		newPunctuation.Successors = make(map[string]*WordSuccessor)
 		word.Punctuations[punctuation] = newPunctuation
 		word.TotalPunctuationCount++
+		word.TotalPunctuationOccurrences++
+		return newPunctuation, nil
 	}
-	word.TotalPunctuationOccurrences++
-	return nil
 }
 
 func (word *Word) GetKey() string {

@@ -5,6 +5,7 @@ import (
 	"log"
 	"math/rand"
 	"nanogengo/counting"
+	"nanogengo/data"
 	"nanogengo/genio"
 	"os"
 	"time"
@@ -42,7 +43,7 @@ func main() {
 		fmt.Printf("Word's next punctuation is: '%v'\n", punctuation.Punctuation)
 	}
 
-	nextWord, err := firstWord.GetNextWord()
+	nextWord, err := data.GetNextWord(firstWord)
 	if err != nil {
 		log.Fatalf("Failed to get the next word: %v\n", err)
 	}

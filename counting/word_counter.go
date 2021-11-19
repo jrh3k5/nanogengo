@@ -40,6 +40,7 @@ func CountWords(line string, words *data.Words) error {
 	}
 
 	var previousWord *data.Word
+	var previousPunctuation *data.Punctuation
 	tokens := strings.Split(line, " ")
 	for _, token := range tokens {
 		trimmedToken := strings.TrimSpace(token)
@@ -50,24 +51,31 @@ func CountWords(line string, words *data.Words) error {
 		effectiveToken := punctuationRegex.ReplaceAllString(trimmedToken, "")
 		currentWord := words.AddWordOccurrence(effectiveToken)
 
-		if previousWord == nil {
+		if previousPunctuation != nil {
+			if previousPunctuation.Terminator {
+				currentWord.IncrementSentenceStart(1)
+			}
+			data.AddSuccessor(previousPunctuation, currentWord)
+		} else if previousWord == nil {
 			currentWord.IncrementSentenceStart(1)
+		} else if previousWord != nil {
+			data.AddSuccessor(previousWord, currentWord)
 		}
 
-		// If there's any non-alphanumeric characters at the end, then consider this the end of the
-		// sentence, so 'reset' the tracking so that the end of this sentence isn't mistakenly
-		// tracked as preceding the beginning of the next sentence
+		// If the current token doesn't terminate in a punctuation, then set it up so
+		// that the current word is chained to the next token
+		// Otherwise, set it up so that the next token will be chained to the punctuation following
+		// the current word
 		if !punctuationRegex.MatchString(trimmedToken) {
-			if previousWord != nil {
-				data.AddSuccessor(previousWord, currentWord)
-			}
+			previousPunctuation = nil
 			previousWord = currentWord
 		} else {
 			punctuation := punctuationRegex.FindStringSubmatch(trimmedToken)[0]
-			err = currentWord.AddPunctuation(punctuation)
+			addedPunctuation, err := currentWord.AddPunctuation(punctuation)
 			if err != nil {
 				return fmt.Errorf("unable to add punctuation '%v' for word '%v': %v", punctuation, trimmedToken, err)
 			}
+			previousPunctuation = addedPunctuation
 			previousWord = nil
 		}
 	}
