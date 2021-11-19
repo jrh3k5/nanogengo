@@ -103,30 +103,6 @@ func main() {
 
 		fmt.Print(" ")
 	}
-
-	// fmt.Printf("First word is: %v\n", firstWord.Word)
-
-	// punctuation, err := firstWord.GetPunctuation()
-	// if err != nil {
-	// 	log.Fatalf("Failed to get a punctuation: %v\n", err)
-	// }
-
-	// if punctuation == nil {
-	// 	fmt.Printf("No punctuation available.\n")
-	// } else {
-	// 	fmt.Printf("Word's next punctuation is: '%v'\n", punctuation.Punctuation)
-	// }
-
-	// nextWord, err := data.GetNextWord(firstWord)
-	// if err != nil {
-	// 	log.Fatalf("Failed to get the next word: %v\n", err)
-	// }
-
-	// if nextWord == nil {
-	// 	fmt.Printf("No next word available.\n")
-	// } else {
-	// 	fmt.Printf("Word's next word is: '%v'\n", nextWord.Word)
-	// }
 }
 
 // init sets initial values for variables used in the function.
