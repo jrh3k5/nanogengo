@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"nanogengo/counting"
-	"nanogengo/data"
-	"nanogengo/genio"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/jrh3k5/nanogengo/counting"
+	"github.com/jrh3k5/nanogengo/data"
+	"github.com/jrh3k5/nanogengo/genio"
 )
 
 func main() {

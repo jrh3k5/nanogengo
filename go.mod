@@ -1,4 +1,4 @@
-module nanogengo
+module github.com/jrh3k5/nanogengo
 
 go 1.17
 

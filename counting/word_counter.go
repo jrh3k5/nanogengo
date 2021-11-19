@@ -2,10 +2,11 @@ package counting
 
 import (
 	"fmt"
-	"nanogengo/data"
-	"nanogengo/genio"
 	"regexp"
 	"strings"
+
+	"github.com/jrh3k5/nanogengo/data"
+	"github.com/jrh3k5/nanogengo/genio"
 )
 
 type WordCounter interface {

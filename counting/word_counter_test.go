@@ -1,8 +1,9 @@
 package counting
 
 import (
-	"nanogengo/genio"
 	"testing"
+
+	"github.com/jrh3k5/nanogengo/genio"
 
 	"gotest.tools/v3/assert"
 	is "gotest.tools/v3/assert/cmp"
