@@ -31,11 +31,18 @@ func main() {
 		log.Fatal("Unable to select a matching starting first word\n")
 	}
 
+	currentSentenceLength := 0
 	for wordCount := 0; wordCount < 500 && currentWord != nil; wordCount++ {
+		currentSentenceLength++
 		fmt.Print(currentWord.Word)
-		punctuation, err := currentWord.GetPunctuation()
-		if err != nil {
-			log.Fatalf("Unable to get punctuation for word '%v': %v", currentWord.Word, err)
+		var punctuation *data.Punctuation
+		// Avoid awkwardness of too-short sentences by only getting a punctuation if there's enough
+		// sentence to punctuate
+		if currentSentenceLength > 2 {
+			punctuation, err = currentWord.GetPunctuation()
+			if err != nil {
+				log.Fatalf("Unable to get punctuation for word '%v': %v", currentWord.Word, err)
+			}
 		}
 
 		if punctuation != nil {
@@ -44,6 +51,7 @@ func main() {
 			if err != nil {
 				log.Fatalf("Unable to get next word after punctuation '%v': %v", punctuation.Punctuation, err)
 			}
+			currentSentenceLength = 0
 		} else {
 			nextWord, err := data.GetNextWord(currentWord)
 			if err != nil {

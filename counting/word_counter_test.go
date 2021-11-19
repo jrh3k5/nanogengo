@@ -102,3 +102,19 @@ func TestCountsStripPunctuation(t *testing.T) {
 	assert.Assert(t, is.Contains(henWord.Punctuations, "!"))
 	assert.Equal(t, henWord.Punctuations["!"].TotalSuccessorCount, 0)
 }
+
+func TestStripParenthesis(t *testing.T) {
+	lines := []string{"something (within) parenthesis"}
+	linesProvider := genio.ArrayLinesProvider{Lines: lines}
+	wordCounter := LinesProviderWordCounter{LinesProvider: linesProvider}
+	words, err := wordCounter.CountWords()
+	assert.NilError(t, err, "Error occurred while counting words")
+
+	assert.Equal(t, words.TotalWordCount, 3)
+	assert.Assert(t, is.Contains(words.Words, "something"))
+	assert.Assert(t, is.Contains(words.Words, "within"))
+	assert.Assert(t, is.Contains(words.Words, "parenthesis"))
+
+	// Make sure that the closing parenthesis is not incorrectly treated as punctuation
+	assert.Equal(t, words.Words["within"].TotalPunctuationCount, 0)
+}

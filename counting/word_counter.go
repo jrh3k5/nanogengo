@@ -34,7 +34,14 @@ func (wordCounter LinesProviderWordCounter) CountWords() (data.Words, error) {
 }
 
 func CountWords(line string, words *data.Words) error {
-	punctuationRegex, err := regexp.Compile("[^a-zA-Z0-9]+$")
+	punctuationRegex, err := regexp.Compile("[.;\\!\\?]{1}$")
+	if err != nil {
+		return err
+	}
+
+	// Do the same pattern as punctuation regex, but without the $ terminator so that non-tail
+	// non-alpha characters are replaced
+	trimAllRegex, err := regexp.Compile("[^a-zA-Z0-9]+")
 	if err != nil {
 		return err
 	}
@@ -48,7 +55,7 @@ func CountWords(line string, words *data.Words) error {
 			continue
 		}
 
-		effectiveToken := punctuationRegex.ReplaceAllString(trimmedToken, "")
+		effectiveToken := trimAllRegex.ReplaceAllString(trimmedToken, "")
 		currentWord := words.AddWordOccurrence(effectiveToken)
 
 		if previousPunctuation != nil {
