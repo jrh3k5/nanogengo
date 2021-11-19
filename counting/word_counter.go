@@ -59,7 +59,7 @@ func CountWords(line string, words *data.Words) error {
 		// tracked as preceding the beginning of the next sentence
 		if !punctuationRegex.MatchString(trimmedToken) {
 			if previousWord != nil {
-				previousWord.AddSuccessor(currentWord)
+				data.AddSuccessor(previousWord, currentWord)
 			}
 			previousWord = currentWord
 		} else {

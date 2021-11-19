@@ -7,9 +7,11 @@ import (
 )
 
 type Successable interface {
-	Successors() map[string]*WordSuccessor
-	TotalSuccessorCount() int
-	TotalSuccessorOccurrences() int
+	GetSuccessors() map[string]*WordSuccessor
+	GetTotalSuccessorCount() int
+	GetTotalSuccessorOccurrences() int
+	IncrementSuccessorCount(delta int)
+	IncrementSuccessorOccurrences(delta int)
 }
 
 type Word struct {
@@ -24,6 +26,26 @@ type Word struct {
 	SentenceStartCount          int
 }
 
+func (word *Word) GetSuccessors() map[string]*WordSuccessor {
+	return word.Successors
+}
+
+func (word *Word) GetTotalSuccessorCount() int {
+	return word.TotalSuccessorCount
+}
+
+func (word *Word) GetTotalSuccessorOccurrences() int {
+	return word.TotalPunctuationOccurrences
+}
+
+func (word *Word) IncrementSuccessorCount(delta int) {
+	word.TotalSuccessorCount += delta
+}
+
+func (word *Word) IncrementSuccessorOccurrences(delta int) {
+	word.TotalSuccessorOccurrences += delta
+}
+
 type WordSuccessor struct {
 	Word        *Word
 	Occurrences int
@@ -35,6 +57,26 @@ type Punctuation struct {
 	Successors                map[string]*WordSuccessor
 	TotalSuccessorCount       int
 	TotalSuccessorOccurrences int
+}
+
+func (punctuation *Punctuation) GetSuccessors() map[string]*WordSuccessor {
+	return punctuation.Successors
+}
+
+func (punctuation *Punctuation) GetTotalSuccessorCount() int {
+	return punctuation.TotalSuccessorCount
+}
+
+func (punctuation *Punctuation) GetTotalSuccessorOccurrences() int {
+	return punctuation.TotalSuccessorOccurrences
+}
+
+func (puncutation *Punctuation) IncrementSuccessorCount(delta int) {
+	puncutation.TotalSuccessorCount += delta
+}
+
+func (punctuation *Punctuation) IncrementSuccessorOccurrences(delta int) {
+	punctuation.TotalSuccessorOccurrences += delta
 }
 
 func NewWord(word string) *Word {
@@ -61,30 +103,17 @@ func (punctuation *Punctuation) IncrementOccurrences(delta int) {
 	punctuation.Occurrences = punctuation.Occurrences + delta
 }
 
-func (word *Word) AddSuccessor(successor *Word) {
-	if existingSuccessor, doesContain := word.Successors[successor.GetKey()]; doesContain {
+func AddSuccessor(successable Successable, successor *Word) {
+	if existingSuccessor, doesContain := successable.GetSuccessors()[successor.GetKey()]; doesContain {
 		existingSuccessor.IncrementOccurrences(1)
 	} else {
 		newSuccessor := new(WordSuccessor)
 		newSuccessor.Word = successor
 		newSuccessor.Occurrences = 1
-		word.Successors[successor.GetKey()] = newSuccessor
-		word.TotalSuccessorCount++
+		successable.GetSuccessors()[successor.GetKey()] = newSuccessor
+		successable.IncrementSuccessorCount(1)
 	}
-	word.TotalSuccessorOccurrences++
-}
-
-func (punctuation *Punctuation) AddSuccessor(successor *Word) {
-	if existingSuccessor, doesContain := punctuation.Successors[successor.GetKey()]; doesContain {
-		existingSuccessor.IncrementOccurrences(1)
-	} else {
-		newSuccessor := new(WordSuccessor)
-		newSuccessor.Word = successor
-		newSuccessor.Occurrences = 1
-		punctuation.Successors[successor.GetKey()] = newSuccessor
-		punctuation.TotalSuccessorCount++
-	}
-	punctuation.TotalSuccessorOccurrences++
+	successable.IncrementSuccessorOccurrences(1)
 }
 
 func (word *Word) AddPunctuation(punctuation string) error {
@@ -142,9 +171,8 @@ func (word *Word) GetPunctuation() (*Punctuation, error) {
 	return matchingPunctuation, nil
 }
 
-// Gets the next word for the given word. Returns nil if there is no word to follow.
-func (word *Word) GetNextWord() (*Word, error) {
-	if word.TotalSuccessorCount == 0 {
+func GetNextWord(successable Successable) (*Word, error) {
+	if successable.GetTotalSuccessorCount() == 0 {
 		return nil, nil
 	}
 
@@ -152,8 +180,8 @@ func (word *Word) GetNextWord() (*Word, error) {
 	for matchingWord == nil {
 		wordProbability := rand.Float64()
 		var matchingWordProbability float64
-		for _, candidate := range word.Successors {
-			candidateProbability := float64(candidate.Occurrences) / float64(word.TotalPunctuationOccurrences)
+		for _, candidate := range successable.GetSuccessors() {
+			candidateProbability := float64(candidate.Occurrences) / float64(successable.GetTotalSuccessorOccurrences())
 			// If the current candidate is within the range of probability and is *more probable* than what was previously selected,
 			// use that word
 			if candidateProbability >= wordProbability && candidateProbability >= matchingWordProbability {
